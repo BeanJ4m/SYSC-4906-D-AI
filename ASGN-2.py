@@ -30,6 +30,13 @@ class SearchAgent:
             print(" ".join(row))
     def bfs(self):
     # Implement BFS logic: return exploration steps, path cost, and path length, or None if no path is found.
+        cost = 0
+        path = deque()
+        explored = deque()
+        fringe = deque()
+        explored.append(self.start)
+        fringe.append(self.start)
+        return len(explored), cost, len(path)
     def dfs(self):
         """
         create fringe
@@ -39,23 +46,81 @@ class SearchAgent:
         explore next node (top of stack for dfs)
         if goal reached return path
         """
-        route = deque()
+        exploration_steps = 0
+        cost = 0
+        path = []
+        explored = []
         fringe = deque()
+        explored.append(self.start)
+        path.append(self.start)
         fringe.append(self.start)
-        if fringe(0) == self.goal:
-            return route
+        
+        while fringe:
 
-        
-        
-        
+            branch_end = True
+            
+            #get the next node in the fringe
+            node = fringe.pop()
+            explored.append(node)
+            
+            cost += self.get_cost(node)
+            #stop if it is the goal
+            if node == self.goal:
+                self.print_path(path)
+                return len(explored), cost, len(path)
+            
+            if branch_end:
+                while path[1] != node:
+                    path.pop()
+                    
+            path.append(node)
+            north = (node[0]-1,node[1])
+            east = (node[0],node[1]+1)
+            south = (node[0]+1,node[1])
+            west = (node[0],node[1]-1)
+            #explore the node clockwise starting with north
+            if self.is_valid(north) and north not in explored:
+                fringe.append(north)
+                branch_end = False
+            if self.is_valid(east) and east not in explored:
+                fringe.append(east)
+                branch_end = False
+            if self.is_valid(south) and south not in explored:
+                fringe.append(south)
+                branch_end = False
+            if self.is_valid(west) and west not in explored:
+                fringe.append(west)
+                branch_end = False
+                
+        return None
+            
+  
     # Implement DFS logic: return exploration steps, path cost, and path length, or None if no path is found.
     def ucs(self):
     # Implement UCS logic: return exploration steps, path cost, and path length, or None if no path is found.
+        length = 0
+        cost = 0
+        path = deque()
+        explored = deque()
+        fringe = deque()
+        explored.append(self.start)
+        fringe.append(self.start)
+        
+        return len(explored), cost, len(path)
     def astar(self, heuristic=None):
+        length = 0
+        cost = 0
+        path = deque()
+        explored = deque()
+        fringe = deque()
+        explored.append(self.start)
+        fringe.append(self.start)
+        
         if heuristic is None:
             def heuristic(pos):
                 return abs(pos[0] - self.goal[0]) + abs(pos[1] - self.goal[1])
     # Implement A* logic: return exploration steps, path cost, and path length, or None if no path is found.
+        return len(explored), cost, len(path)
 def test_search_agent(agent):
     results = {}
     print("\n--- BFS ---")
