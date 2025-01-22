@@ -32,66 +32,56 @@ class SearchAgent:
     # Implement BFS logic: return exploration steps, path cost, and path length, or None if no path is found.
         cost = 0
         path = deque()
-        explored = deque()
+        explored = set()
         fringe = deque()
-        explored.append(self.start)
+        explored.add(self.start)
         fringe.append(self.start)
         return len(explored), cost, len(path)
     def dfs(self):
-        """
-        create fringe
-        start
-        check all valid nodes (N,E,S,W) (Not visited)
-        if valid add to fringe (stack)
-        explore next node (top of stack for dfs)
-        if goal reached return path
-        """
+        
         exploration_steps = 0
         cost = 0
-        path = []
-        explored = []
-        fringe = deque()
-        explored.append(self.start)
-        path.append(self.start)
-        fringe.append(self.start)
-        
-        while fringe:
+        path = []  
+        explored = set()  
+        fringe = deque() 
 
-            branch_end = True
-            
-            #get the next node in the fringe
-            node = fringe.pop()
-            explored.append(node)
-            
+        # Start DFS
+        fringe.append((self.start, [self.start]))  # Add the start node with the initial path
+
+        while fringe:
+            # Get the next node and its path
+            node, path = fringe.pop()
+
+            # Skip if already explored
+            if node in explored:
+                continue
+
+            # Mark as explored
+            explored.add(node)
+            exploration_steps += 1
+
+            # Update cost
             cost += self.get_cost(node)
-            #stop if it is the goal
+
+            # Stop if the goal is reached
             if node == self.goal:
                 self.print_path(path)
                 return len(explored), cost, len(path)
-            
-            if branch_end:
-                while path[1] != node:
-                    path.pop()
-                    
-            path.append(node)
-            north = (node[0]-1,node[1])
-            east = (node[0],node[1]+1)
-            south = (node[0]+1,node[1])
-            west = (node[0],node[1]-1)
-            #explore the node clockwise starting with north
-            if self.is_valid(north) and north not in explored:
-                fringe.append(north)
-                branch_end = False
-            if self.is_valid(east) and east not in explored:
-                fringe.append(east)
-                branch_end = False
-            if self.is_valid(south) and south not in explored:
-                fringe.append(south)
-                branch_end = False
-            if self.is_valid(west) and west not in explored:
-                fringe.append(west)
-                branch_end = False
-                
+
+            # Backtracking happens here as the `current_path` is updated for each new neighbor
+            neighbors = [
+                (node[0] - 1, node[1]),  # North
+                (node[0], node[1] + 1),  # East
+                (node[0] + 1, node[1]),  # South
+                (node[0], node[1] - 1),  # West
+            ]
+            for neighbor in neighbors:
+                # If the neighbor is valid and hasn't been explored, append it to the fringe
+                if self.is_valid(neighbor) and neighbor not in explored:
+                    # The new path here represents the backtracking step: `current_path + [neighbor]`
+                    fringe.append((neighbor, path + [neighbor]))  # Add new path with the neighbor
+
+        # If no path is found
         return None
             
   
