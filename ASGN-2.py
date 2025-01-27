@@ -30,15 +30,53 @@ class SearchAgent:
             print(" ".join(row))
     def bfs(self):
     # Implement BFS logic: return exploration steps, path cost, and path length, or None if no path is found.
+        exploration_steps = 0
         cost = 0
-        path = deque()
-        explored = set()
-        fringe = deque()
-        explored.add(self.start)
-        fringe.append(self.start)
-        return len(path), len(explored), cost
+        path = []  
+        explored = set()  
+        fringe = deque() 
+
+        # Start BFS
+        fringe.append((self.start, [self.start]))  # Add the start node with the initial path
+
+        while fringe:
+            # Get the next node and its path
+            node, path = fringe.popleft()
+
+            # Skip if already explored
+            if node in explored:
+                continue
+
+            # Mark as explored
+            explored.add(node)
+            exploration_steps += 1
+
+            # Update cost
+            cost += self.get_cost(node)
+
+            # Stop if the goal is reached
+            if node == self.goal:
+                self.print_path(path)
+                return len(path), len(explored), cost
+
+            # Backtracking happens here as the `current_path` is updated for each new neighbor
+            neighbors = [
+                (node[0] - 1, node[1]),  # North
+                (node[0], node[1] + 1),  # East
+                (node[0] + 1, node[1]),  # South
+                (node[0], node[1] - 1),  # West
+            ]
+            for neighbor in neighbors:
+                # If the neighbor is valid and hasn't been explored, append it to the fringe
+                if self.is_valid(neighbor) and neighbor not in explored:
+                    # The new path here represents the backtracking step: `current_path + [neighbor]`
+                    fringe.append((neighbor, path + [neighbor]))  # Add new path with the neighbor
+
+        # If no path is found
+        return None
+    
     def dfs(self):
-        
+     # Implement DFS logic: return exploration steps, path cost, and path length, or None if no path is found.
         exploration_steps = 0
         cost = 0
         path = []  
@@ -83,19 +121,51 @@ class SearchAgent:
 
         # If no path is found
         return None
-            
-  
-    # Implement DFS logic: return exploration steps, path cost, and path length, or None if no path is found.
+              
     def ucs(self):
     # Implement UCS logic: return exploration steps, path cost, and path length, or None if no path is found.
-        cost = 0
-        path = deque()
-        explored = deque()
-        fringe = deque()
-        explored.append(self.start)
-        fringe.append(self.start)
+        exploration_steps = 0
+        explored = set()
+        fringe = []
         
-        return len(path), len(explored), cost
+        # The fringe will hold tuples of (cumulative_cost, current_position, path_taken)
+        heapq.heappush(fringe, (0, self.start, [self.start]))
+
+        while fringe:
+            # Pop the lowest-cost path from the priority queue
+            cumulative_cost, current_node, path = heapq.heappop(fringe)
+
+            # Skip if already explored
+            if current_node in explored:
+                continue
+
+            # Mark the current node as explored
+            explored.add(current_node)
+            exploration_steps += 1
+
+            # Check if we reached the goal
+            if current_node == self.goal:
+                self.print_path(path)
+                return len(path), exploration_steps, cumulative_cost
+
+            # Explore neighbors
+            neighbors = [
+                (current_node[0] - 1, current_node[1]),  # North
+                (current_node[0], current_node[1] + 1),  # East
+                (current_node[0] + 1, current_node[1]),  # South
+                (current_node[0], current_node[1] - 1),  # West
+            ]
+            
+            for neighbor in neighbors:
+                if self.is_valid(neighbor) and neighbor not in explored:
+                    # Calculate the new cumulative cost to this neighbor
+                    new_cost = cumulative_cost + self.get_cost(neighbor)
+                    # Push this neighbor onto the fringe
+                    heapq.heappush(fringe, (new_cost, neighbor, path + [neighbor]))
+
+        # If no path is found
+        return None
+    
     def astar(self, heuristic=None):
         # Implement A* logic: return exploration steps, path cost, and path length, or None if no path is found.
         if heuristic is None:
