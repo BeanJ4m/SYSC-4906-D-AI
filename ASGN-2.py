@@ -36,7 +36,7 @@ class SearchAgent:
         fringe = deque()
         explored.add(self.start)
         fringe.append(self.start)
-        return len(explored), cost, len(path)
+        return len(path), len(explored), cost
     def dfs(self):
         
         exploration_steps = 0
@@ -66,7 +66,7 @@ class SearchAgent:
             # Stop if the goal is reached
             if node == self.goal:
                 self.print_path(path)
-                return len(explored), cost, len(path)
+                return len(path), len(explored), cost
 
             # Backtracking happens here as the `current_path` is updated for each new neighbor
             neighbors = [
@@ -88,7 +88,6 @@ class SearchAgent:
     # Implement DFS logic: return exploration steps, path cost, and path length, or None if no path is found.
     def ucs(self):
     # Implement UCS logic: return exploration steps, path cost, and path length, or None if no path is found.
-        length = 0
         cost = 0
         path = deque()
         explored = deque()
@@ -96,21 +95,42 @@ class SearchAgent:
         explored.append(self.start)
         fringe.append(self.start)
         
-        return len(explored), cost, len(path)
+        return len(path), len(explored), cost
     def astar(self, heuristic=None):
-        length = 0
-        cost = 0
-        path = deque()
-        explored = deque()
-        fringe = deque()
-        explored.append(self.start)
-        fringe.append(self.start)
-        
+        # Implement A* logic: return exploration steps, path cost, and path length, or None if no path is found.
         if heuristic is None:
             def heuristic(pos):
                 return abs(pos[0] - self.goal[0]) + abs(pos[1] - self.goal[1])
-    # Implement A* logic: return exploration steps, path cost, and path length, or None if no path is found.
-        return len(explored), cost, len(path)
+        
+        fringe = []
+        explored = set()
+        
+        heapq.heappush(fringe, (0 + heuristic(self.start), 0, self.start, deque([self.start])))  # (f, g, node, path)
+        
+        while fringe:
+            f, g, node, path = heapq.heappop(fringe)
+            if node == self.goal:
+                self.print_path(list(path))
+                return len(path), len(explored), g
+            if node in explored:
+                continue
+            neighbors = [
+                (node[0] - 1, node[1]),  # North
+                (node[0], node[1] + 1),  # East
+                (node[0] + 1, node[1]),  # South
+                (node[0], node[1] - 1),  # West
+            ]
+            explored.add(node)
+
+            for neighbor in neighbors:
+                if self.is_valid(neighbor) and neighbor not in explored:
+                    g_new = g + self.get_cost(neighbor)  # Cost from start to neighbor
+                    f_new = g_new + heuristic(neighbor)  # Total estimated cost (f = g + h)
+                    new_path = deque(path)
+                    new_path.append(neighbor)
+                    heapq.heappush(fringe, (f_new, g_new, neighbor, new_path))
+                    
+        return None
 def test_search_agent(agent):
     results = {}
     print("\n--- BFS ---")
