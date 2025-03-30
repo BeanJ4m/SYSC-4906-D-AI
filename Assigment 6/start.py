@@ -20,3 +20,7 @@ print("Dataset shape: ", df.shape)
 print("Columns: ", df.columns.tolist())
 # Check the class distribution in the target column
 print(df['Attack_type'].value_counts())
+
+# Shuffle the DataFrame rows
+df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+
