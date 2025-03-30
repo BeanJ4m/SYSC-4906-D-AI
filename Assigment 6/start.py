@@ -24,3 +24,19 @@ print(df['Attack_type'].value_counts())
 # Shuffle the DataFrame rows
 df = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
+# Remove rows with any NaN ( missing ) values
+df = df.dropna()
+
+print(df['Attack_type'].value_counts())
+Label_names = ['Normal', 'DDoS_UDP', 'DDoS_ICMP', 'DDoS_TCP', 'DDoS_HTTP',
+               'Password', 'Vulnerability_scanner', 'Uploading', 'SQL_injection']
+Label_numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+mapping = dict(zip(Label_names, Label_numbers))
+df['Attack_type'] = df['Attack_type'].map(mapping)
+print(df['Attack_type'].value_counts())
+
+# One - hot encode all categorical feature columns
+# ( Assume ’ CategoryFeature ’ is a categorical column in the dataset )
+df=pd.get_dummies(df,columns=['CategoryFeature'])
+df=df.sample(frac=1,random_state=42).reset_index(drop=True)
+print("Columns after one-hot encoding:",df.columns.tolist())
