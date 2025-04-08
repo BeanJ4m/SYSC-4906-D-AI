@@ -87,7 +87,9 @@ criterion = nn.CrossEntropyLoss()
 # Training function
 def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=20):
     metrics = {'train_loss': [], 'val_loss': [], 'train_acc': [], 'val_acc': []}
+
     for epoch in range(epochs):
+        # Training phase
         model.train()
         train_loss, train_correct = 0, 0
         for X_batch, y_batch in train_loader:
@@ -96,30 +98,42 @@ def train_model(model, criterion, optimizer, train_loader, val_loader, epochs=20
             loss = criterion(outputs, y_batch)
             loss.backward()
             optimizer.step()
+
+            # Accumulate training loss and accuracy
             train_loss += loss.item() * X_batch.size(0)
             _, preds = torch.max(outputs, 1)
             train_correct += (preds == y_batch).sum().item()
-        
+
+        # Validation phase
         model.eval()
         val_loss, val_correct = 0, 0
         with torch.no_grad():
             for X_batch, y_batch in val_loader:
                 outputs = model(X_batch)
                 loss = criterion(outputs, y_batch)
+
+                # Accumulate validation loss and accuracy
                 val_loss += loss.item() * X_batch.size(0)
                 _, preds = torch.max(outputs, 1)
                 val_correct += (preds == y_batch).sum().item()
-        
-        metrics['train_loss'].append(train_loss / len(train_loader.dataset))
-        metrics['val_loss'].append(val_loss / len(val_loader.dataset))
-        metrics['train_acc'].append(train_correct / len(train_loader.dataset))
-        metrics['val_acc'].append(val_correct / len(val_loader.dataset))
-        
+
+        # Calculate average loss and accuracy for the epoch
+        train_loss /= len(train_loader.dataset)
+        val_loss /= len(val_loader.dataset)
+        train_acc = train_correct / len(train_loader.dataset)
+        val_acc = val_correct / len(val_loader.dataset)
+
+        # Store metrics
+        metrics['train_loss'].append(train_loss)
+        metrics['val_loss'].append(val_loss)
+        metrics['train_acc'].append(train_acc)
+        metrics['val_acc'].append(val_acc)
+
+        # Print epoch summary
         print(f"Epoch {epoch+1}/{epochs} | "
-              f"Train Loss: {metrics['train_loss'][-1]:.4f} | "
-              f"Val Loss: {metrics['val_loss'][-1]:.4f} | "
-              f"Train Acc: {metrics['train_acc'][-1]:.4f} | "
-              f"Val Acc: {metrics['val_acc'][-1]:.4f}")
+              f"Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f} | "
+              f"Train Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f}")
+
     return metrics
 
 # Plot metrics
