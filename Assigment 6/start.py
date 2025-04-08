@@ -44,10 +44,13 @@ print("Columns after one-hot encoding:", df.columns.tolist())
 
 
 # Separate features and labels
-X = df.drop('Attack_type_1', axis=1)
-y = df['Attack_type_1']
-# all feature columns
-# the numeric labels
+i=0
+while i < 9:
+    X = df.drop('Attack_type_'+str(Label_numbers[i]), axis=1)
+    y = df['Attack_type_'+str(Label_numbers[i])]
+    i += 1
+
+
 # First split : Training + Validation vs Test
 X_train_val, X_test, y_train_val, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y)
